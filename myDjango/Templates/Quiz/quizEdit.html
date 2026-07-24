@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Quiz Question</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+
+        background: #e6f0ff;
+
+            margin: 20px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        .question-container {
+            width: 100%;
+            font-size: 18px;
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        .answers-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .answer-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .answer-option input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .answer-option input[type="checkbox"] {
+            margin-left: 10px;
+            transform: scale(1.2);
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .delete-btn {
+            background-color: #d9534f;
+        }
+        .delete-btn:hover {
+            background-color: #c9302c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Edit Quiz Question</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <label>Question:</label>
+            {{ question_form.qzText }}
+
+            <h3>Answers:</h3>
+            <div class="answers-container">
+                {% for answer in answers %}
+                    <div class="answer-option">
+                        <input type="text" name="new_ansText[]" value="{{ answer.ansText }}" required>
+                        <label>Is Correct?</label>
+                        <input type="checkbox" name="new_is_correct[]" {% if answer.is_correct %}checked{% endif %}>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-answer-btn">Add Another Answer</button>
+
+            <div class="buttons">
+                <button type="submit">Save Changes</button>
+                <a href="{% url 'delete_quiz_question' quiz_id=quiz.id question_id=question.id %}">
+                    <button type="button" class="delete-btn">Delete Question</button>
+                </a>
+            </div>
+        </form>
+
+        <a href="{% url 'qz_detail' quiz_id=quiz.id %}">Back to Quiz</a>
+    </div>
+
+    <script>
+        document.getElementById('add-answer-btn').addEventListener('click', function() {
+            // Create a new answer input field dynamically
+            const newAnswerHTML = `
+                <div class="answer-option">
+                    <input type="text" name="new_ansText[]" placeholder="Answer Text" required>
+                    <label>Is Correct?</label>
+                    <input type="checkbox" name="new_is_correct[]">
+                </div>
+            `;
+
+            // Append the new answer input field to the answers container
+            const answersContainer = document.querySelector('.answers-container');
+            answersContainer.insertAdjacentHTML('beforeend', newAnswerHTML);
+        });
+    </script>
+
+</body>
+</html>

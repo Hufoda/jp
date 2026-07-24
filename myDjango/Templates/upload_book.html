@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Reference Book</title>
+{% load static %}
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #e6f0ff;
+    }
+
+    .container {
+        display: flex;
+        width: 850px;
+        max-width: 95%;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+        background: #fff;
+    }
+
+    /* Left Panel */
+    .left-panel {
+        width: 50%;
+        padding: 40px 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .left-panel h2 {
+        color: #004466;
+        font-size: 2rem;
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #004466;
+    }
+
+    input[type="text"],
+    select,
+    input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        font-size: 15px;
+        outline: none;
+        transition: border 0.3s;
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    input[type="file"]:focus {
+        border-color: #004466;
+        box-shadow: 0 0 6px rgba(0,68,102,0.2);
+    }
+
+    .custom-file-upload {
+        display: block;
+        padding: 12px;
+        border: 2px dashed #004466;
+        border-radius: 8px;
+        cursor: pointer;
+        text-align: center;
+        color: #004466;
+        margin-bottom: 10px;
+        transition: background 0.3s;
+    }
+
+    .custom-file-upload:hover {
+        background: rgba(0,68,102,0.1);
+    }
+
+    .file-name {
+        font-size: 14px;
+        color: #555;
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+    .btn-upload {
+        width: 100%;
+        padding: 12px;
+        background:  #89c4f4;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+        margin-bottom: 15px;
+    }
+
+    .btn-upload:hover {
+        background: #1a75ff;
+        transform: scale(1.03);
+    }
+
+    a.back-link {
+        display: inline-block;
+        color: #004466;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+        color: #1a75ff;
+    }
+
+    /* Right Panel with Floating Circles */
+    .right-panel {
+        width: 50%;
+        background: linear-gradient(135deg, #cce0ff, #e6f0ff);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .circle {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(0, 68, 102, 0.15);
+        animation: float 12s infinite ease-in-out;
+    }
+
+    .circle1 { width: 100px; height: 100px; top: 10%; left: 20%; animation-delay: 0s; }
+    .circle2 { width: 60px; height: 60px; top: 50%; left: 10%; animation-delay: 3s; }
+    .circle3 { width: 80px; height: 80px; top: 70%; left: 60%; animation-delay: 6s; }
+    .circle4 { width: 50px; height: 50px; top: 30%; left: 70%; animation-delay: 9s; }
+
+    @keyframes float {
+        0% { transform: translateY(0) translateX(0); }
+        50% { transform: translateY(-20px) translateX(10px); }
+        100% { transform: translateY(0) translateX(0); }
+    }
+
+    @media (max-width: 768px) {
+        .container { flex-direction: column; }
+        .right-panel { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <h2>Upload Reference Book</h2>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="id_title">Book Title</label>
+            <input type="text" id="id_title" name="title" required>
+
+            <label for="id_level">Select Level</label>
+            <select id="id_level" name="level" required>
+                <option value="N5">N5</option>
+                <option value="N4">N4</option>
+                <option value="N3">N3</option>
+                <option value="N2">N2</option>
+                <option value="N1">N1</option>
+            </select>
+
+            <label class="custom-file-upload">
+                <input type="file" id="file-upload" name="file" required>
+                Click to Upload File
+            </label>
+            <p class="file-name" id="file-name">No file chosen</p>
+
+            <button type="submit" class="btn-upload">Upload</button>
+            <a href="javascript:history.back()" class="back-link">← Back</a>
+        </form>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+        <div class="circle circle1"></div>
+        <div class="circle circle2"></div>
+        <div class="circle circle3"></div>
+        <div class="circle circle4"></div>
+    </div>
+</div>
+
+<script>
+    document.getElementById("file-upload").addEventListener("change", function() {
+        const fileName = this.files[0] ? this.files[0].name : "No file chosen";
+        document.getElementById("file-name").textContent = fileName;
+    });
+</script>
+
+</body>
+</html>

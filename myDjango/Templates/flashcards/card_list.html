@@ -1,0 +1,194 @@
+{% extends 'flashcards/base.html' %}
+
+{% block content %}
+
+{% if user.is_authenticated and user.is_staff %}
+    <div class="admin-actions" style="text-align: center; margin-bottom: 20px;">
+       <a href="{% url 'flashcard_add' lesson.level %}">➕ Add New Flashcard</a>
+    </div>
+{% endif %}
+
+<div class="card-counter">
+    Card <span id="current-index">1</span> of <span id="total-cards">{{ cards|length }}</span>
+</div>
+
+<div class="navigation">
+    <button id="prev-btn" disabled>Previous</button>
+    <button id="next-btn" {% if cards|length <= 1 %}disabled{% endif %}>Next</button>
+</div>
+
+<div class="flashcard-container">
+    <div class="flashcard" id="flashcard">
+        <div class="flashcard-inner">
+            <div class="flashcard-front">
+                <img id="front-image" src="{{ cards.0.front_image.url }}" alt="Front image">
+            </div>
+            <div class="flashcard-back">
+                <img id="back-image" src="{{ cards.0.back_image.url }}" alt="Back image">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="instructions">
+    <p>Click on the card to flip it. Use the buttons to navigate between cards.</p>
+    <p>Keyboard shortcuts: Spacebar to flip, Arrow keys to navigate</p>
+</div>
+
+<style>
+.flashcard-container {
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    margin: 30px 0;
+}
+
+.flashcard {
+    width: 300px;
+    height: 400px;
+    cursor: pointer;
+}
+
+.flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    border-radius: 15px;
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
+}
+
+.flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.flashcard-front, .flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flashcard-back {
+    transform: rotateY(180deg);
+    background: linear-gradient(135deg, #fceabb, #f8b500);
+}
+
+.flashcard img {
+    max-width: 80%;
+    max-height: 80%;
+    border-radius: 10px;
+}
+
+.navigation {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.navigation button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ff6f61;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.navigation button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.navigation button:hover:not(:disabled) {
+    background-color: #ff3b2f;
+}
+
+.card-counter {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.instructions {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    margin-top: 20px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const flashcard = document.getElementById('flashcard');
+    const frontImage = document.getElementById('front-image');
+    const backImage = document.getElementById('back-image');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const currentIndexEl = document.getElementById('current-index');
+
+    const cards = [
+        {% for card in cards %}
+        {
+            front_image: "{{ card.front_image.url }}",
+            back_image: "{{ card.back_image.url }}",
+            title: "{{ card.title|escapejs }}"
+        },
+        {% endfor %}
+    ];
+
+    let currentIndex = 0;
+    const totalCards = cards.length;
+
+    function updateNavigation() {
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex === totalCards - 1;
+        currentIndexEl.textContent = currentIndex + 1;
+    }
+
+    flashcard.addEventListener('click', function() {
+        flashcard.classList.toggle('flipped');
+    });
+
+    nextBtn.addEventListener('click', function() {
+        if (currentIndex < totalCards - 1) {
+            currentIndex++;
+            updateCard();
+        }
+    });
+
+    prevBtn.addEventListener('click', function() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateCard();
+        }
+    });
+
+    function updateCard() {
+        const currentCard = cards[currentIndex];
+        frontImage.src = currentCard.front_image;
+        backImage.src = currentCard.back_image;
+        flashcard.classList.remove('flipped');
+        updateNavigation();
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowRight') nextBtn.click();
+        else if (e.key === 'ArrowLeft') prevBtn.click();
+        else if (e.key === ' ') { flashcard.click(); e.preventDefault(); }
+    });
+
+    updateNavigation();
+});
+</script>
+
+{% endblock %}

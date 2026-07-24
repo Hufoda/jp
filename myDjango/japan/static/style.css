@@ -1,0 +1,28 @@
+.container {
+    margin-top: 20px;
+}
+.level-section {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.level-section.reverse {
+    flex-direction: row-reverse;
+}
+
+.text {
+    flex: 1;
+    padding: 20px;
+}
+
+.image {
+    flex: 1;
+    padding: 20px;
+}
+
+.image img {
+    width: 50%;
+    height: 50%;
+    border-radius: 8px;
+}

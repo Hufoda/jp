@@ -1,0 +1,128 @@
+{% extends 'Master.html' %}
+
+{% block title %}User Details - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="user-details">
+        <h3 class="username">{{ user.username }}</h3>
+
+        <div class="user-meta">
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Joined:</strong> {{ user.date_joined|date:"M d, Y" }}</p>
+
+            <p><strong>Completed Lessons:</strong></p>
+            <ul class="lesson-list">
+                {% for progress in user.progress_set.all %}
+                    {% if progress.completed %}
+                        <li><span class="lesson-title">{{ progress.lesson_detail.lesson }}</span> - {{ progress.lesson_detail.title }}</li>
+                    {% endif %}
+                {% empty %}
+                    <li>No completed lessons</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="javascript:history.back()">← Back</a>
+    </div>
+</div>
+
+<style>
+        a {
+    text-decoration: none;
+}
+
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Center content */
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 75vh;
+        padding: 15px;
+    }
+
+    /* Card Design */
+    .user-details {
+        background: #fff;
+        padding: 25px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: left;
+    }
+
+    /* Username */
+    .username {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #333;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    /* User metadata */
+    .user-meta p {
+        font-size: 1rem;
+        color: #444;
+        margin: 8px 0;
+    }
+
+    /* Completed Lessons List */
+    .lesson-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 8px;
+    }
+
+    .lesson-list li {
+        background: #eef5ff;
+        padding: 8px;
+        margin-bottom: 6px;
+        border-radius: 5px;
+        font-size: 0.95rem;
+        color: #0056b3;
+    }
+
+    .lesson-title {
+        font-weight: bold;
+        color: #003d80;
+    }
+
+    /* Back button */
+    .btn-back {
+        background-color: #6c757d;
+        color: white;
+        padding: 10px;
+        font-size: 14px;
+        border: none;
+        border-radius: 6px;
+        width: 100%;
+        cursor: pointer;
+        transition: background 0.3s ease-in-out;
+    }
+
+    .btn-back:hover {
+        background-color: #5a6268;
+    }
+
+    @media (max-width: 500px) {
+        .container {
+            height: auto;
+            padding: 10px;
+        }
+
+        .user-details {
+            width: 90%;
+            padding: 20px;
+        }
+    }
+</style>
+
+{% endblock %}

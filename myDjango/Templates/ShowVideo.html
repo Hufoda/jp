@@ -1,0 +1,391 @@
+{% extends 'Master.html' %}
+{% load static %}
+
+{% block title %}{{ lesson_detail.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header class="header">
+        <h1 class="lesson-title">{{ lesson_detail.title }}</h1>
+    </header>
+
+    <div class="video-list">
+        {% for video in videos %}
+            {% if not video.archived or is_admin %}
+            <div class="video-item" id="video-{{ video.id }}" style="transition: opacity 0.3s;">
+                <div class="video-wrapper">
+                    <video controls {% if not is_admin %}onended="markCompleted({{ video.id }})"{% endif %}>
+                        <source src="{{ video.video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <h4 class="video-title">{{ video.title }}</h4>
+
+                {# --- Normal Users --- #}
+                {% if not is_admin %}
+                    {% if video.id in completed_videos %}
+                        <button class="btn-completed" disabled>✅ Completed</button>
+                    {% else %}
+                        <button class="btn-mark">Mark Completed ✅</button>
+                    {% endif %}
+                {% endif %}
+
+                {# --- Admins --- #}
+                {% if is_admin %}
+                    {% if video.archived %}
+                        <button type="button" class="btn btn-success btn-sm restore-btn" data-id="{{ video.id }}">
+                            Restore Video
+                        </button>
+                    {% else %}
+                        <button type="button" class="btn btn-danger btn-sm delete-btn" data-id="{{ video.id }}">
+                            Delete Video
+                        </button>
+                    {% endif %}
+                {% endif %}
+            </div>
+            {% endif %}
+        {% empty %}
+            <p class="no-videos">No videos available for this lesson.</p>
+        {% endfor %}
+    </div>
+
+    <div id="lesson-status">
+        {% if not is_admin %}
+            {% if all_completed %}
+                <h3 class="text-success">🎉 Lesson Completed!</h3>
+            {% else %}
+                <h3 class="text-warning">⚡ Keep Going! Complete all videos to finish the lesson.</h3>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="actions">
+        {% if is_admin %}
+            <a href="{% url 'upload_video' lesson_detail.id %}" class="upload-btn">Upload Video</a>
+        {% endif %}
+        <a href="{% url 'lesson_list' lesson_detail.lesson.level %}" class="btn-back">⬅ Back to Lessons</a>
+    </div>
+</div>
+
+{# --- Mark Completed JS (Normal Users) --- #}
+{% if not is_admin %}
+<script>
+function markCompleted(videoId) {
+    fetch("{% url 'mark_video_complete' lesson_detail.id %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ video_id: videoId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const videoDiv = document.getElementById(`video-${videoId}`);
+            const btn = videoDiv.querySelector("button");
+            btn.textContent = "✅ Completed";
+            btn.disabled = true;
+            btn.classList.remove("btn-mark");
+            btn.classList.add("btn-completed");
+
+            const statusDiv = document.getElementById("lesson-status");
+            if (data.lesson_completed) {
+                statusDiv.innerHTML = "<h3 class='text-success'>🎉 Lesson Completed!</h3>";
+            } else {
+                statusDiv.innerHTML = "<h3 class='text-warning'>⚡ Keep Going! Complete all videos to finish the lesson.</h3>";
+            }
+        }
+    })
+    .catch(err => console.error("Error marking video:", err));
+}
+</script>
+{% endif %}
+
+{# --- Admin JS for Delete & Restore --- #}
+{% if is_admin %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    function bindDelete(btn) {
+        btn.onclick = async function () {
+            const videoId = btn.dataset.id;
+            if(!confirm('Are you sure you want to delete this video?')) return;
+
+            try {
+                const resp = await fetch(`/delete_video/${videoId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await resp.json();
+                if(data.success){
+                    btn.textContent = "Archived";
+                    btn.disabled = true;
+                    btn.classList.remove('btn-danger');
+                    btn.style.backgroundColor = "#6c757d";
+                    btn.style.cursor = "not-allowed";
+                }
+            } catch(err) { console.error(err); }
+        }
+    }
+
+    function bindRestore(btn) {
+        btn.onclick = async function () {
+            const videoId = btn.dataset.id;
+            if(!confirm('Restore this video?')) return;
+
+            try {
+                const resp = await fetch(`/restore_video/${videoId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await resp.json();
+                if(data.success){
+                    // Change button to delete button
+                    btn.textContent = "Delete Video";
+                    btn.classList.remove('btn-success', 'restore-btn');
+                    btn.classList.add('btn-danger', 'delete-btn');
+                    btn.disabled = false;
+                    btn.style.backgroundColor = "";
+                    btn.style.cursor = "pointer";
+
+                    // Rebind delete functionality
+                    bindDelete(btn);
+                }
+            } catch(err) { console.error(err); }
+        }
+    }
+
+    // Bind buttons on page load
+    document.querySelectorAll('.delete-btn').forEach(bindDelete);
+    document.querySelectorAll('.restore-btn').forEach(bindRestore);
+
+});
+</script>
+{% endif %}
+
+
+
+<!-- CSS Styling (unchanged) -->
+<style>
+/* ====================== Container & Header ====================== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+        background: #e6f0ff;
+
+    margin: 0;
+    padding: 0;
+}
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+.lesson-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    letter-spacing: 0.5px;
+}
+
+/* ====================== Video Grid ====================== */
+.video-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 28px;
+}
+
+/* ====================== Video Cards ====================== */
+.video-item {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+.video-item:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+.video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    height: 0;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.video-wrapper video {
+    position: absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    border-radius: 10px;
+}
+
+/* ====================== Video Titles ====================== */
+.video-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 12px 0;
+    color: #34495e;
+}
+
+/* ====================== Buttons ====================== */
+button, .btn-back, .upload-btn {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: transform 0.2s, box-shadow 0.2s, background 0.3s;
+}
+
+/* Normal User Buttons */
+.btn-mark {
+    background: linear-gradient(135deg,#1abc9c,#16a085);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin-top: 12px;
+}
+.btn-mark:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.btn-completed {
+    background: linear-gradient(135deg,#2ecc71,#27ae60);
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-top: 12px;
+    cursor: default;
+}
+
+/* Admin Buttons */
+.delete-btn {
+    background: linear-gradient(135deg,#e74c3c,#c0392b);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.delete-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.12);
+}
+
+.restore-btn {
+    background: linear-gradient(135deg,#3498db,#2980b9);
+    color: #fff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+.restore-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.12);
+}
+
+/* ====================== Lesson Status ====================== */
+#lesson-status {
+    margin-top: 40px;
+    padding: 25px 30px;
+    border-radius: 14px;
+    font-size: 1.35rem;
+    font-weight: 600;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    transition: all 0.3s ease-in-out;
+}
+#lesson-status h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.4rem;
+}
+.text-success {
+    background: linear-gradient(135deg, #d4edda, #a8e6cf);
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+.text-warning {
+
+    color: #856404;
+    border: 1px solid #ffeeba;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+/* ====================== Action Buttons ====================== */
+.actions {
+    margin-top: 30px;
+    text-align: center;
+}
+.upload-btn {
+    display: inline-block;
+    text-decoration: none;
+    background: linear-gradient(135deg, #89c4f4, #ff758c);
+    color: white;
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-weight: 600;
+    margin-right: 12px;
+}
+.upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+.btn-back {
+    text-decoration: none;
+    background: linear-gradient(135deg,#3498db,#2980b9);
+    color: white;
+    padding: 12px 26px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+.btn-back:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+/* ====================== Responsive Tweaks ====================== */
+@media (max-width: 768px) {
+    .video-item { padding: 15px; }
+    .video-title { font-size: 1.1rem; }
+    #lesson-status { font-size: 1.2rem; padding: 20px 20px; }
+}
+</style>
+
+
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'Master.html' %}
+{% load static %}
+
+{% block title %}Select JLPT Level{% endblock %}
+
+{% block content %}
+<div class="content-container d-flex flex-column justify-content-center align-items-center text-center">
+
+    <div class="level-section-wrapper">
+       <p class="level-badge">Your current level :<span>{{user_level}} 🎖️</span></p>
+
+        <!-- N5 Section -->
+        <div class="level-section">
+            <div class="text">
+                <h2>N5 - Beginner</h2>
+                <p>Start your Japanese journey with basic grammar, vocabulary, and kanji.</p>
+                {% if user_level <= 5 or is_admin %}
+                    <a href="{% url 'lesson_list' level='N5' %}" class="btn btn-yellow">Learn More</a>
+                {% else %}
+                    <button class="btn btn-secondary" disabled>Locked</button>
+                {% endif %}
+            </div>
+            <div class="image">
+                <img src="{% static 'images/n5.png' %}" alt="N5 Level">
+            </div>
+        </div>
+
+        <!-- N4 Section -->
+        <div class="level-section reverse">
+            <div class="text">
+                <h2>N4 - Upper Beginner</h2>
+                <p>Build on your foundation with more complex grammar and vocabulary.</p>
+                {% if user_level <= 4 or is_admin %}
+                    <a href="{% url 'lesson_list' level='N4' %}" class="btn btn-yellow">Learn More</a>
+                {% else %}
+                    <button class="btn btn-secondary" disabled>Locked</button>
+                {% endif %}
+            </div>
+            <div class="image">
+                <img src="{% static 'images/n4_image.png' %}" alt="N4 Level">
+            </div>
+        </div>
+
+        <!-- N3 Section -->
+        <div class="level-section">
+            <div class="text">
+                <h2>N3 - Intermediate</h2>
+                <p>Enhance your skills with intermediate-level grammar and kanji.</p>
+                {% if user_level <= 3 or is_admin %}
+                    <a href="{% url 'lesson_list' level='N3' %}" class="btn btn-yellow">Learn More</a>
+                {% else %}
+                    <button class="btn btn-secondary" disabled>Locked</button>
+                {% endif %}
+            </div>
+            <div class="image">
+                <img src="{% static 'images/n3_image.png' %}" alt="N3 Level">
+            </div>
+        </div>
+
+        <!-- N2 Section -->
+        <div class="level-section reverse">
+            <div class="text">
+                <h2>N2 - Upper Intermediate</h2>
+                <p>Master advanced grammar and kanji to achieve fluency.</p>
+                {% if user_level <= 2 or is_admin %}
+                    <a href="{% url 'lesson_list' level='N2' %}" class="btn btn-yellow">Learn More</a>
+                {% else %}
+                    <button class="btn btn-secondary" disabled>Locked</button>
+                {% endif %}
+            </div>
+            <div class="image">
+                <img src="{% static 'images/n2_image.png' %}" alt="N2 Level">
+            </div>
+        </div>
+
+        <!-- N1 Section -->
+        <div class="level-section">
+            <div class="text">
+                <h2>N1 - Advanced</h2>
+                <p>Refine your skills to reach native-level proficiency.</p>
+                {% if user_level <= 1 or is_admin %}
+                    <a href="{% url 'lesson_list' level='N1' %}" class="btn">Learn More</a>
+                {% else %}
+                    <button class="btn btn-secondary" disabled>Locked</button>
+                {% endif %}
+            </div>
+            <div class="image">
+                <img src="{% static 'images/n1_image.png' %}" alt="N1 Level">
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Container */
+.content-container {
+    margin-top: 0px;
+    margin-bottom: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Level Section Wrapper */
+.level-section-wrapper {
+    width: 100%;
+    max-width: 1000px;
+}
+.level-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #89c4f4, #ff758c);
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    text-transform: uppercase;
+}
+
+.level-badge span {
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+/* Level Sections */
+.level-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+
+    padding: 20px;
+    border-radius: 15px;
+    background: #fff; /* neutral white background */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.level-section:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+.level-section.reverse {
+    flex-direction: row-reverse;
+}
+
+/* Text */
+.text {
+    flex: 1;
+    padding: 15px;
+    color: #2c3e50;
+}
+
+.text h2 {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.text p {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Image */
+.image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.image img {
+    width: 100%;
+    max-width: 250px;
+    border-radius: 12px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.image img:hover {
+    transform: scale(1.05);
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: #89c4f4;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+
+.btn-secondary {
+   padding: 12px 28px;
+    border-radius: 30px;
+    background: #89c4f4;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .level-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    .level-section.reverse {
+        flex-direction: column;
+    }
+    .image img {
+        max-width: 200px;
+        margin-bottom: 10px;
+    }
+    .text h2 {
+        font-size: 22px;
+    }
+    .text p {
+        font-size: 14px;
+    }
+    .btn-yellow, .btn-secondary {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}
+</style>
+
+{% endblock %}

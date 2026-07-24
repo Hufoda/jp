@@ -1,0 +1,119 @@
+{% extends 'Master.html' %}
+{% block title %}Your Quiz Scores{% endblock %}
+
+{% block content %}
+<style>
+    body {
+
+        background: #e6f0ff;
+
+        font-family: 'Inter', sans-serif;
+    }
+
+    .quiz-results-card {
+        max-width: 800px;
+        margin: auto;
+        padding: 30px;
+        border-radius: 12px;
+        background-color: #ffffff;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .quiz-results-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.12);
+    }
+
+    .quiz-results-card h2 {
+        font-weight: 700;
+        color: #1e3a8a;
+        margin-bottom: 20px;
+    }
+
+    .score-text {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+    }
+
+    .feedback-title {
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #111827;
+    }
+
+    .list-group-item {
+        border-radius: 10px;
+        margin-bottom: 12px;
+        padding: 15px;
+        background-color: #f9fafb;
+        transition: background 0.2s;
+    }
+
+    .list-group-item:hover {
+        background-color: #f3f4f6;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 12px;
+        font-weight: 600;
+    }
+
+    .correct-badge {
+        background-color: #22c55e;
+        color: white;
+    }
+
+    .incorrect-badge {
+        background-color: #ef4444;
+        color: white;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border: none;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+</style>
+
+<div class="quiz-results-card">
+    <h2 class="text-center">Quiz Results</h2>
+
+    <p class="text-center score-text">
+        <strong>You got <span class="text-success">{{ score }}</span> out of <span class="text-danger">{{ total_questions }}</span> correct.</strong>
+    </p>
+
+    <h3 class="feedback-title">Feedback</h3>
+    <ul class="list-group">
+        {% for item in feedback %}
+        <li class="list-group-item">
+            <p><strong>Question:</strong> {{ item.question }}</p>
+            <p><strong>Your Answer:</strong> {{ item.selected_answer }}</p>
+            {% if item.correct %}
+                <span class="badge correct-badge">Correct!</span>
+            {% else %}
+                <span class="badge incorrect-badge">Incorrect</span>
+                <p><strong>Correct Answer:</strong> {{ item.correct_answer }}</p>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="text-center mt-4">
+        <a href="{% url 'quiz_home' %}" class="btn btn-primary">Try Again</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+
+<section class="services-section">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Nunito:wght@400;700&display=swap');
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background:  linear-gradient(135deg, #e6f0ff, #f0f8ff);
+      color: #444;
+      overflow-x: hidden;
+    }
+
+    .services-section {
+      padding: 4rem 2rem;
+      text-align: center;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .services-header h1 {
+       font-family: 'Poppins', sans-serif;
+      font-size: 2.8rem;
+      color:#5a9bd4;
+      margin-bottom: 0.5rem;
+      text-shadow: 2px 2px #fff;
+    }
+
+    .services-header p {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 3rem;
+    }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .service-card {
+      background: #fff;
+      border-radius: 2rem;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .service-card:hover {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 12px 25px rgba(255, 126, 185, 0.3);
+    }
+
+    .service-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      animation: bounce 2s infinite;
+    }
+
+    .service-card h3 {
+
+      font-size: 1.5rem;
+     color:#5a9bd4;
+      margin-bottom: 0.8rem;
+    }
+
+    .service-card p {
+      font-size: 1rem;
+      color: #555;
+    }
+
+    /* Bounce animation */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* Floating kawaii clouds */
+    .cloud {
+      position: absolute;
+      width: 100px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: float 20s linear infinite;
+      z-index: 1;
+    }
+    .cloud::before,
+    .cloud::after {
+      content: "";
+      position: absolute;
+      background: #fff;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      top: -20px;
+      left: 10px;
+    }
+    .cloud::after {
+      width: 60px;
+      height: 60px;
+      left: auto;
+      right: 15px;
+      top: -10px;
+    }
+    @keyframes float {
+      from { left: -150px; }
+      to { left: 110%; }
+    }
+
+    /* Cute button style */
+    .read-more {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.5rem 1.2rem;
+      border-radius: 1.5rem;
+      background: #5a9bd4;;
+      color: #fff;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+    .read-more:hover {
+      background: #ff9ecf;
+    }
+  </style>
+
+  <!-- Floating kawaii clouds -->
+  <div class="cloud" style="top:10%; animation-duration:40s;"></div>
+  <div class="cloud" style="top:30%; animation-duration:50s;"></div>
+  <div class="cloud" style="top:60%; animation-duration:60s;"></div>
+
+  <div class="services-header">
+    <h1 style="color: #2c3e50 ">🌸 Playful Japanese Learning 🌸</h1>
+    <p>Learn Japanese with Style — From Basics to Polite Speech✨</p>
+  </div>
+
+  <div class="services-grid">
+     <div class="service-card">
+      <div class="service-icon">📝</div>
+       <h3>Skill Boost Challenges</h3>
+      <p>Challenge yourself with quizzes after each lesson to test your progress.</p>
+      <span class="read-more" data-more="extra2">Read More</span>
+      <p id="extra2" style="display:none;">JLPT N3–N2 prep included, with fun cultural activities 🎉</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">🎴</div>
+      <h3>Interactive Flashcards</h3>
+      <p>Memorize vocabulary and kanji with cute, themed flashcards.</p>
+      <span class="read-more" data-more="extra2">Read More</span>
+      <p id="extra2" style="display:none;">JLPT N3–N2 prep included, with fun cultural activities 🎉</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">🎥</div>
+     <h3>Free Video Lessons</h3>
+      <p>Watch structured video tutorials for all levels of Japanese learning.</p>
+      <span class="read-more" data-more="extra3">Read More</span>
+      <p id="extra3" style="display:none;">Perfect for JLPT N1 & business Japanese learners ✨</p>
+    </div>
+
+    <div class="service-card">
+      <div class="service-icon">📰</div>
+      <h3>News & Opportunities</h3>
+      <p>Stay updated on Japanese education, scholarships, and job offers.</p>
+      <span class="read-more" data-more="extra4">Read More</span>
+      <p id="extra4" style="display:none;">Conversation clubs and kawaii events included 🎀</p>
+    </div>
+  </div>
+</section>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function(){
+    $(".read-more").click(function(){
+      let target = $(this).data("more");
+      $("#" + target).slideToggle(400);
+      $(this).text($(this).text() === "Read More" ? "Show Less" : "Read More");
+    });
+  });
+</script>
+

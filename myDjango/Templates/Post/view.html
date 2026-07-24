@@ -1,0 +1,25 @@
+{% extends 'Master.html' %}
+
+{% block title %}Quiz Home - Learn Japanese{% endblock %}
+
+{% block content %}
+<!--<div class="container mt-5">-->
+        <h2>Posts</h2>
+        {% for post in posts %}
+            <!--<div class="card mt-2">
+                <div class="card-body">-->
+ <h3 class="fw-bold">{{ post.title }}</h3>
+                    <p style="color: bold; font-size: 16px;">{{ post.text }}</p>
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" class="img-fluid" alt="Uploaded Image">
+                    {% endif %}
+                    <p class="text-muted">{{ post.created_at }}</p>
+                    <a href="{% url 'edit_post' post.id %}" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm">Delete</a>
+
+
+        {% endfor %}
+        <a href="{% url 'upload_post' %}" class="btn btn-primary mt-3">Upload New Post</a>
+
+
+{% endblock %}

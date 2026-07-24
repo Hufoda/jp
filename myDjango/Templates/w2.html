@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}About - Aesthetic Nihongo{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: #fdfdff;
+    color: #333;
+    margin: 0;
+  }
+
+  section {
+    padding: 80px 20px;
+    position: relative;
+  }
+
+  h1, h2, h3 {
+    color: #2c3e50;
+    font-weight: 700;
+  }
+
+  p {
+    color: #555;
+    line-height: 1.6;
+  }
+
+  /* HERO SECTION */
+  .hero {
+   background: linear-gradient(135deg, #e6f0ff, #f0f8ff);
+    text-align: center;
+    padding: 100px 20px;
+    border-bottom: 1px solid #dce3f0;
+  }
+
+  .hero h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto 30px;
+  }
+
+  .btn {
+    padding: 12px 28px;
+    border-radius: 30px;
+    background: #89c4f4;
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+
+  .btn:hover {
+    background: #74b9ff;
+    transform: translateY(-3px);
+  }
+
+  /* ADVANTAGES */
+  .advantages {
+    background: #f7faff;
+    text-align: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+  }
+
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+  }
+
+  .card img {
+  width: 150px;
+  height: auto;
+  margin-bottom: 20px;
+  display: inline-block;
+  background: none;
+  padding: 0;
+  border-radius: 12px;
+}
+
+
+  /* VALUE PROPOSITION */
+  .value-prop {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 50px;
+    justify-content: center;
+    background: #ffffff;
+    border-top: 1px solid #eaeaea;
+    border-bottom: 1px solid #eaeaea;
+  }
+
+  .value-prop img {
+    max-width: 400px;
+    border-radius: 20px;
+  }
+
+  .value-text {
+    max-width: 500px;
+  }
+
+  /* FEATURES */
+  .features {
+    background: #eef7ff;
+    text-align: center;
+  }
+
+  /* CONTACT SECTION */
+  .contact {
+    background: #2c3e50;
+    color: white;
+    text-align: center;
+  }
+
+  .contact input,
+  .contact textarea {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px;
+    margin: 10px auto;
+    border: none;
+    border-radius: 8px;
+    display: block;
+  }
+
+  .contact button {
+    background: #74b9ff;
+    color: white;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 30px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+
+  @media(max-width: 768px) {
+    .hero h1 { font-size: 2rem; }
+    .value-prop { flex-direction: column; }
+  }
+
+  /* Floating icons */
+  .floating {
+    position: absolute;
+    font-size: 2rem;
+    animation: float 6s ease-in-out infinite;
+    opacity: 0.3;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+  }
+
+
+  /* TESTIMONIALS */
+.testimonials {
+  background: #f9fcff;
+  text-align: center;
+  padding: 80px 20px;
+}
+
+.testimonials h2 {
+  margin-bottom: 40px;
+}
+
+.testimonials .card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 25px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  transition: transform 0.3s ease;
+}
+
+.testimonials .card:hover {
+  transform: translateY(-5px);
+}
+
+.testimonials p {
+  font-style: italic;
+  margin-bottom: 15px;
+  color: #444;
+}
+
+.testimonials h4 {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+
+</style>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="floating" style="top:10%; left:15%;">🌸</span>
+  <span class="floating" style="top:20%; left:75%;">🎐</span>
+  <span class="floating" style="top:50%; left:5%;">🗾</span>
+
+  <h1>Learn About Aesthetic Nihongo 🌸</h1>
+  <p>We make learning Japanese an immersive, visually soothing, and joyful experience. Explore what makes us different below.</p>
+  <a href="{% url 'signup' %}" class="btn">Join the Journey</a>
+</section>
+
+<!-- ADVANTAGES -->
+<section class="advantages">
+  <h2>Advantages</h2>
+  <div class="grid">
+    <div class="card">
+      <img src="{% static 'images/pl.png' %}" alt="Advantage 1">
+      <h3>Peaceful Learning</h3>
+      <p>Experience language learning with soft visuals and a stress-free vibe.</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'images/vm.png' %}" alt="Advantage 2">
+      <h3>Visual Memory</h3>
+      <p>Enhance retention using beautifully designed kanji flashcards and notes.</p>
+    </div>
+    <div class="card">
+      <img src="{% static 'images/flow.png' %}" alt="Advantage 3">
+      <h3>Built for Flow</h3>
+      <p>Minimal distractions and a curated flow so you stay in your learning zone.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE PROPOSITION -->
+<section class="value-prop">
+  <div class="value-text">
+    <h2>Our Promise</h2>
+    <p>We merge traditional language learning with modern design to give you the most aesthetic and effective Japanese learning environment. From beginners to advanced learners, our content adapts to your style.</p>
+  </div>
+  <img src="{% static 'images/img_2.png' %}" alt="Value">
+</section>
+
+<section class="testimonials">
+  <h2>What Our Learners Say</h2>
+  <div class="grid">
+    <div class="card">
+      <p>🌸 “Aesthetic Nihongo makes learning so calming. I never thought studying kanji could feel like relaxing with art.”</p>
+      <h4>— Anna, Beginner Learner</h4>
+    </div>
+    <div class="card">
+      <p>🎐 “The flashcards are gorgeous and the flow is minimalistic. I remember words so much faster now.”</p>
+      <h4>— Kenji, Intermediate Learner</h4>
+    </div>
+    <div class="card">
+      <p>🗾 “It feels like learning Japanese in a meditative space. Truly unique compared to other platforms.”</p>
+      <h4>— Sofia, JLPT N4 Student</h4>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- FEATURES -->
+<section class="features">
+  <h2>Features You'll Love</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>📖 Beautiful Lessons</h3>
+      <p>Each lesson is like flipping through a storybook—visually and mentally engaging.</p>
+    </div>
+    <div class="card">
+      <h3>🎨 Aesthetic Flashcards</h3>
+      <p>Soft pastel tones and simple kanji graphics make memorization gentle and clear.</p>
+    </div>
+    <div class="card">
+      <h3>💬 Real Practice</h3>
+      <p>Simulated conversations help reinforce vocabulary with context and culture.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact">
+  <h2>Let's Connect</h2>
+  <form>
+    <input type="text" placeholder="Your Name" required />
+    <input type="email" placeholder="Your Email" required />
+    <textarea rows="5" placeholder="Your Message"></textarea>
+    <button type="submit">Send Message</button>
+  </form>
+</section>
+
+{% endblock %}

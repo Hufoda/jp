@@ -1,0 +1,130 @@
+{% extends 'Master.html' %}
+
+{% block title %}Quiz Home - Learn Japanese{% endblock %}
+
+{% block content %}
+<div class="quiz-container">
+    <h1>Welcome to the Quiz Section</h1>
+    <p class="intro-text">Test your Japanese language skills with quizzes tailored for different JLPT levels.</p>
+
+    <div class="quiz-grid">
+        {% if user_level <= 5 or is_admin %}
+            <a href="{% url 'qz_list' level='N5' %}" class="quiz-btn n5">N5 - Beginner Quiz</a>
+        {% else %}
+            <span class="quiz-btn locked">N5 - Beginner Quiz (Locked)</span>
+        {% endif %}
+
+        {% if user_level <= 4 or is_admin %}
+            <a href="{% url 'qz_list' level='N4' %}" class="quiz-btn n4">N4 - Upper Beginner Quiz</a>
+        {% else %}
+            <span class="quiz-btn locked">N4 - Upper Beginner Quiz (Locked)</span>
+        {% endif %}
+
+        {% if user_level <= 3 or is_admin %}
+            <a href="{% url 'qz_list' level='N3' %}" class="quiz-btn n3">N3 - Intermediate Quiz</a>
+        {% else %}
+            <span class="quiz-btn locked">N3 - Intermediate Quiz (Locked)</span>
+        {% endif %}
+
+        {% if user_level <= 2 or is_admin %}
+            <a href="{% url 'qz_list' level='N2' %}" class="quiz-btn n2">N2 - Upper Intermediate Quiz</a>
+        {% else %}
+            <span class="quiz-btn locked">N2 - Upper Intermediate Quiz (Locked)</span>
+        {% endif %}
+
+        {% if user_level <= 1 or is_admin %}
+            <a href="{% url 'qz_list' level='N1' %}" class="quiz-btn n1">N1 - Advanced Quiz</a>
+        {% else %}
+            <span class="quiz-btn locked">N1 - Advanced Quiz (Locked)</span>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    body {
+
+        background: #e6f0ff;
+
+        font-family: 'Inter', sans-serif;
+    }
+
+    .quiz-container {
+        max-width: 950px;
+        margin: 0px auto;
+        padding: 40px 30px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .quiz-container:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+        font-size: 2.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 10px;
+    }
+
+    .intro-text {
+        font-size: 1.1rem;
+        color: #4b5563;
+        margin-bottom: 40px;
+    }
+
+    .quiz-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+    }
+
+    .quiz-btn {
+        display: inline-block;
+        padding: 18px 25px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #fff;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .quiz-btn:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    }
+
+    /* Gradient colors for levels */
+    .quiz-btn.n5 { background: linear-gradient(135deg, #3b82f6, #60a5fa); }
+    .quiz-btn.n4 { background: linear-gradient(135deg, #10b981, #34d399); }
+    .quiz-btn.n3 { background: linear-gradient(135deg, #06b6d4, #22d3ee); }
+    .quiz-btn.n2 { background: linear-gradient(135deg, #f59e0b, #fbbf24); }
+    .quiz-btn.n1 { background: linear-gradient(135deg, #ef4444, #f87171); }
+
+    .quiz-btn.locked {
+        background-color: #9ca3af !important;
+        color: #f3f4f6;
+        cursor: not-allowed;
+        pointer-events: none;
+        opacity: 0.7;
+        box-shadow: none;
+    }
+
+    @media (max-width: 640px) {
+        .quiz-btn {
+            font-size: 1rem;
+            padding: 14px 20px;
+        }
+        .quiz-container {
+            padding: 30px 20px;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends 'Master.html' %}
+{% load static %}
+
+{% block title %}Quiz for {{ level }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="text-center fw-bold mb-3">Quiz for {{ level }}</h2>
+    <p class="text-center text-muted mb-4">Select a quiz below to test your Japanese skills.</p>
+
+    <!-- Quiz Type Filter -->
+    <form method="GET" action="{% url 'qz_list' level %}" class="filter-form d-flex justify-content-center align-items-center mb-5 gap-2">
+        <label for="quiz-type" class="fw-semibold me-2">Filter by Type:</label>
+        <select name="quiz_type" id="quiz-type" class="form-select w-auto" onchange="this.form.submit()">
+            <option value="">Choose Quiz Type</option>
+            {% for quiz_type, quiz_label in quiz_types %}
+                <option value="{{ quiz_type }}" {% if quiz_type == selected_quiz_type %}selected{% endif %}>
+                    {{ quiz_label }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <!-- Quizzes Grid -->
+    <div class="row g-4 justify-content-center">
+        {% for quiz in qz_level %}
+        <div class="col-md-4 col-sm-6">
+            <div class="quiz-card p-4 shadow-sm rounded text-center">
+                <h5 class="fw-bold text-dark mb-2">{{ quiz.title }}</h5>
+                <p class="text-muted mb-3">{{ quiz.quiz_type }}</p>
+                {% if is_admin %}
+                <a href="{% url 'qz_detail' quiz.id %}" class="btn btn-outline-primary btn-sm mb-2 w-100">Upload Quiz</a>
+                {% else %}
+                <a href="{% url 'qz_detail' quiz.id %}" class="btn btn-primary btn-sm mb-2">Start Quiz</a>
+                {% endif %}
+
+                {% if user.is_authenticated and is_admin %}
+                <form method="post" action="{% url 'delete_quiz_level' quiz.id %}" class="d-inline w-100">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100 mt-1" onclick="return confirm('Are you sure?');">Delete</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center mt-4">No quizzes available for this level.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Admin Add Quiz Section -->
+    {% if user.is_authenticated and is_admin %}
+    <div class="admin-actions p-4 mt-5 bg-light rounded shadow-sm text-center">
+        <h5 class="fw-bold mb-3">Add a New Quiz</h5>
+        <form method="post" action="{% url 'add_quiz_level' level=level %}" class="d-flex flex-column gap-3">
+            {% csrf_token %}
+            <select name="quiz_type" class="form-select" required>
+                <option value="">Select Quiz Type</option>
+                {% for type_key, type_label in quiz_types %}
+                    <option value="{{ type_key }}">{{ type_label }}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="title" class="form-control" placeholder="Quiz Title" required>
+            <button type="submit" class="btn btn-quiz">Add Quiz</button>
+        </form>
+        <a href="javascript:history.back()" class="text-decoration-none mt-3 d-block">← Back</a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Styles -->
+<style>
+    body {
+
+
+        background: #e6f0ff;
+
+
+        font-family: 'Inter', sans-serif;
+    }
+
+    .quiz-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 25px 20px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .quiz-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+    }
+
+    .quiz-card h5 {
+        font-size: 1.25rem;
+    }
+
+    .quiz-card p {
+        font-size: 0.95rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        border: none;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-outline-primary {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        font-weight: 600;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #3b82f6;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-outline-danger {
+        border-color: #ef4444;
+        color: #ef4444;
+        font-weight: 600;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #ef4444;
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn-quiz {
+        display: inline-block;
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #004466, #002233);
+        color: #fff;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+
+    .btn-quiz:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        background: linear-gradient(135deg, #005577, #003344);
+    }
+
+    .filter-form select {
+        border-radius: 6px;
+    }
+
+    .admin-actions {
+        max-width: 450px;
+        margin: auto;
+    }
+
+    a {
+        color: #3b82f6;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}

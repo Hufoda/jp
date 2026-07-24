@@ -1,0 +1,97 @@
+{% extends 'Master.html' %}
+{% load static %}
+
+{% block title %}Add New Flashcard{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px;">
+
+    <!-- Page Header -->
+    <div class="text-center mb-4">
+        <h2 class="page-title">➕ Add New Flashcard</h2>
+        <p class="text-muted">Fill in the details and upload images (if any) for the flashcard.</p>
+    </div>
+
+    <!-- Flashcard Form -->
+    <form method="post" enctype="multipart/form-data" class="flashcard-form p-4 rounded shadow-sm">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary mt-3">Add Flashcard</button>
+    </form>
+
+    <!-- Back Link -->
+    <div class="mt-4 text-center">
+        <a href="{% url 'card_list' level %}" class="back-link">← Back to Flashcards</a>
+    </div>
+</div>
+
+<!-- Styles -->
+<style>
+.page-title {
+    color: #004466; /* match master navbar blue */
+    font-weight: bold;
+    font-size: 28px;
+}
+
+.flashcard-form {
+    background: #fff; /* neutral white like other content sections */
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.flashcard-form input,
+.flashcard-form select,
+.flashcard-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+.flashcard-form input:focus,
+.flashcard-form select:focus,
+.flashcard-form textarea:focus {
+    outline: none;
+    border-color: #004466; /* match master primary color */
+    box-shadow: 0 0 5px rgba(0, 68, 102, 0.3);
+}
+
+.btn-primary {
+    display: inline-block;
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 16px;
+    border-radius: 25px;
+    background: linear-gradient(135deg, #004466, #002233);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    opacity: 0.95;
+}
+
+.back-link {
+    color: #004466;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flashcard-form {
+        padding: 20px;
+    }
+}
+</style>
+{% endblock %}

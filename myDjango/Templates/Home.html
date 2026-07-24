@@ -1,0 +1,266 @@
+{% extends 'Master.html' %}
+
+{% block title %}Home - Learn Japanese{% endblock %}
+
+{% block content %}
+{% load static %}
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="hero-text">
+        <h2>Welcome to Japanese Learning!</h2>
+        <p>Master Hiragana, Kanji, and Grammar through interactive lessons.</p>
+        {% if is_admin %}
+            <a href="{% url 'level_selection' %}" class="btn btn-hero">Level Details</a>
+        {% else %}
+            <a href="{% url 'level_selection' %}" class="btn btn-hero">Start Learning</a>
+        {% endif %}
+    </div>
+    <!-- Floating Hiragana -->
+    <div class="hiragana-floating">
+        {% for char in "あいうえおかきくけこさしすせそたちつてと" %}
+            <span style="--i: {{ forloop.counter }};">{{ char }}</span>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- News Section -->
+<div class="container news-section">
+    <h2 class="section-heading">Latest News</h2>
+
+    {% for post in posts %}
+    <div class="post-card">
+        <h3>
+            {{ post.title }}
+            {% if post.archived and is_admin %}
+                <span class="badge bg-warning text-dark">ARCHIVED</span>
+            {% endif %}
+        </h3>
+        <p>{{ post.text }}</p>
+        {% if post.image %}
+            <img src="{{ post.image.url }}" alt="Post image" class="news-img">
+        {% endif %}
+        <p class="post-meta">{{ post.created_at|date:"M d, Y" }}</p>
+
+        {% if user.is_authenticated and is_admin %}
+            <div class="post-actions">
+                <a href="{% url 'edit_post' post.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm">Delete</a>
+                {% if post.archived %}
+                    <a href="{% url 'restore_post' post.id %}" class="btn btn-success btn-sm">Restore</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% empty %}
+    <p class="text-center">No posts available.</p>
+{% endfor %}
+
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <ul>
+            {% if posts.has_previous %}
+                <li><a href="?page={{ posts.previous_page_number }}">Previous</a></li>
+            {% else %}
+                <li class="disabled">Previous</li>
+            {% endif %}
+
+            {% for num in posts.paginator.page_range %}
+                {% if posts.number == num %}
+                    <li class="active">{{ num }}</li>
+                {% else %}
+                    <li><a href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if posts.has_next %}
+                <li><a href="?page={{ posts.next_page_number }}">Next</a></li>
+            {% else %}
+                <li class="disabled">Next</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    {% if user.is_authenticated and is_admin %}
+        <a href="{% url 'upload_post' %}" class="btn btn-hero mt-3">Upload News</a>
+    {% endif %}
+</div>
+
+<style>
+/* ---------------- Hero Section ---------------- */
+.hero-section {
+    position: relative;
+    background: #f4f7fb;
+    padding: 100px 20px 60px;
+    border-radius: 12px;
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero-text h2 {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 15px;
+}
+
+.hero-text p {
+    font-size: 18px;
+    color: #334155;
+    margin-bottom: 25px;
+}
+
+.btn-hero {
+    padding: 12px 25px;
+    border-radius: 10px;
+    background: #89c4f4;
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-hero:hover {
+    transform: translateY(-2px);
+}
+
+/* ---------------- Floating Hiragana ---------------- */
+.hiragana-floating {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0; left: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.hiragana-floating span {
+    position: absolute;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: rgba(30,41,59,0.25);
+    text-shadow: 0 0 6px rgba(255,255,255,0.5);
+    animation: floatChar linear infinite;
+}
+
+.hiragana-floating span:nth-child(odd) { animation-duration: 12s; }
+.hiragana-floating span:nth-child(even) { animation-duration: 15s; }
+
+@keyframes floatChar {
+    0% { transform: translateY(120%); left: calc(5% * var(--i)); opacity: 0; }
+    20% { opacity: 0.5; }
+    50% { opacity: 0.7; }
+    100% { transform: translateY(-120%); opacity: 0; }
+}
+
+/* ---------------- News Section ---------------- */
+.news-section {
+    max-width: 900px;
+    margin: 40px auto 80px;
+}
+
+.section-heading {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.post-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+.post-card h3 {
+    font-size: 22px;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.post-card p {
+    font-size: 16px;
+    color: #334155;
+    margin-bottom: 12px;
+}
+
+.news-img {
+    width: 100%;
+    border-radius: 10px;
+    object-fit: cover;
+    margin-bottom: 12px;
+}
+
+.post-meta {
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Post actions buttons */
+.post-actions .btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+    border-radius: 5px;
+    margin-left: 5px;
+}
+
+/* ---------------- Pagination ---------------- */
+.pagination ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+}
+
+.pagination li {
+    margin: 0 5px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.pagination li.active {
+    background: #1e293b;
+    color: #fff;
+}
+
+.pagination li a {
+    text-decoration: none;
+    color: #334155;
+    display: block;
+}
+
+.pagination li.disabled {
+    background: #f1f5f9;
+    color: #94a3b8;
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".hiragana-floating span").forEach(span => {
+        let left = Math.random() * 90 + '%';
+        span.style.left = left;
+    });
+});
+</script>
+
+{% endblock %}

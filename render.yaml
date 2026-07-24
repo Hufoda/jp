@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: japanese-learning
+    runtime: python
+    rootDir: myDjango
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn myDjango.wsgi:application --bind 0.0.0.0:$PORT"
+    healthCheckPath: /health/
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.0"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      - key: USE_S3
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_STORAGE_BUCKET_NAME
+        sync: false
+      - key: AWS_S3_REGION_NAME
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: japanese-learning-db
+          property: connectionString
+
+databases:
+  - name: japanese-learning-db
+    plan: free

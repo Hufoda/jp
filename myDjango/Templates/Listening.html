@@ -1,0 +1,372 @@
+{% extends 'Master.html' %}
+
+{% block title %}Listening Exercises{% endblock %}
+
+{% block content %}
+<div class="container text-center">
+    <h3 class="section-title">Listening Section</h3>
+
+    <!-- Progress bar -->
+    <div class="progress-section">
+       <p class="progress-text" data-completed="{{ completed_count }}">
+    Progress: {{ completed_count }} of {{ total_count }} completed
+       </p>
+
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ percent }}%;"></div>
+        </div>
+    </div>
+
+    {% if listening_exercises %}
+    <div class="listening-list">
+        {% for listening in listening_exercises %}
+        <div class="listening-item" id="item-{{ listening.id }}">
+            <h4 class="listening-title">{{ listening.title }}</h4>
+
+            <!-- Audio player with onended event -->
+            <audio id="audio-{{ listening.id }}" controls>
+                <source src="{{ listening.audio_file.url }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+
+            <!-- Playback speed controls -->
+            <!--div class="speed-controls">
+                <button onclick="setSpeed({{ listening.id }}, 0.75)">0.75x</button>
+                <button onclick="setSpeed({{ listening.id }}, 1)">1x</button>
+                <button onclick="setSpeed({{ listening.id }}, 1.25)">1.25x</button>
+                <button onclick="setSpeed({{ listening.id }}, 1.5)">1.5x</button>
+            </div-->
+
+            <!-- Description -->
+            {% if listening.description %}
+            <p class="listening-description">{{ listening.description }}</p>
+            {% endif %}
+
+            <!-- Transcript toggle -->
+            {% if listening.transcript %}
+            <button class="btn-secondary" onclick="toggleTranscript({{ listening.id }})">📖 Show Transcript</button>
+            <div id="transcript-{{ listening.id }}" class="transcript hidden">
+                <p>{{ listening.transcript }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Download button -->
+            <a href="{{ listening.audio_file.url }}" download class="btn-download">⬇️ Download</a>
+
+            <!-- Completion status -->
+            {% if user.is_authenticated %}
+            <div class="completion-status" id="status-{{ listening.id }}">
+                {% if listening.completed %}
+                    <span class="completed-badge">✔️ Completed</span>
+                {% else %}
+                    <span class="incomplete-badge">◌ Not Completed</span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Admin delete -->
+            {% if is_admin %}
+            <form method="POST" action="{% url 'delete_listening' listening.id %}"
+                  onsubmit="return confirm('Are you sure you want to delete this audio?');">
+                {% csrf_token %}
+                <button type="submit" class="delete-btn">🗑 Delete</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="no-exercises">No listening exercises available at the moment.</p>
+    {% endif %}
+
+    <br/>
+    {% if is_admin %}
+    <a href="{% url 'upload_listening_exercise' %}" class="btn" style="background: linear-gradient(135deg, #89c4f4, #ff758c);">➕ Add New File</a>
+    {% endif %}
+</div>
+
+<!-- JavaScript -->
+<script>
+// Toggle transcript visibility
+function toggleTranscript(id) {
+    const transcript = document.getElementById('transcript-' + id);
+    transcript.classList.toggle('hidden');
+}
+
+// Set audio playback speed
+function setSpeed(id, speed) {
+    const audio = document.getElementById('audio-' + id);
+    audio.playbackRate = speed;
+}
+
+// Function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Mark an exercise as completed
+function markAsCompleted(listeningId) {
+    console.log('Audio ended for listening:', listeningId);
+
+    {% if user.is_authenticated %}
+    fetch("{% url 'mark_listening_completed' 12345 %}".replace('12345', listeningId), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Update the completion badge
+            const statusElement = document.getElementById('status-' + listeningId);
+            if (statusElement) {
+                statusElement.innerHTML = '<span class="completed-badge">✔️ Completed</span>';
+            }
+
+            // Update progress dynamically
+            const progressText = document.querySelector('.progress-text');
+            let completedCount = parseInt(progressText.dataset.completed);
+            const totalCount = parseInt('{{ total_count }}');
+            completedCount += 1;
+            const newPercent = (completedCount / totalCount) * 100;
+
+            progressText.textContent = `Progress: ${completedCount} of ${totalCount} completed`;
+            progressText.dataset.completed = completedCount; // update data attribute
+            document.querySelector('.progress-fill').style.width = `${newPercent}%`;
+        } else {
+            console.error('Error marking completed:', data.message);
+        }
+    })
+    .catch(error => console.error('Fetch error:', error));
+    {% endif %}
+}
+
+// Attach 'ended' event to all audio elements after DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    const audioElements = document.querySelectorAll('audio');
+    audioElements.forEach(audio => {
+        audio.addEventListener('ended', function() {
+            const id = this.id.split('-')[1];
+            markAsCompleted(id);
+        });
+    });
+});
+</script>
+
+
+<style>
+body {
+    padding-top: 0px;
+
+    background-color: #f4f6f8;
+    color: #1f2937;
+}
+
+.section-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin-bottom: 30px;
+}
+
+/* ====================== Progress Section ====================== */
+.progress-section {
+    margin: 20px auto;
+    max-width: 600px;
+    text-align: center;
+}
+
+.progress-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e3a8a;
+    margin-bottom: 8px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 18px;
+    background-color: #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    border-radius: 12px;
+    transition: width 0.4s ease;
+}
+
+/* ====================== Listening Cards ====================== */
+.listening-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.listening-item {
+    background: #ffffff;
+    width: 100%;
+    max-width: 650px;
+    padding: 20px 25px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.listening-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+}
+
+.listening-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 15px;
+}
+
+audio {
+    width: 100%;
+    margin: 15px 0;
+    border-radius: 8px;
+}
+
+/* ====================== Playback Speed Buttons ====================== */
+.speed-controls {
+    margin-bottom: 12px;
+}
+.speed-controls button {
+    margin: 4px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    background-color: #e5e7eb;
+    color: #1f2937;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, background 0.3s;
+}
+.speed-controls button:hover {
+    background-color: #d1d5db;
+    transform: scale(1.05);
+}
+
+/* ====================== Transcript ====================== */
+.transcript {
+    margin-top: 12px;
+    padding: 12px 15px;
+    background-color: #f1f5f9;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #374151;
+    text-align: left;
+}
+.hidden {
+    display: none;
+}
+
+/* ====================== Buttons ====================== */
+.btn-primary, .btn-secondary, .btn-download {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-top: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    color: #ffffff;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #1e40af, #1e3a8a);
+}
+.btn-secondary {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+.btn-download {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+.btn-primary:hover, .btn-secondary:hover, .btn-download:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+/* ====================== Completion Status ====================== */
+.completion-status {
+    margin-top: 12px;
+    font-weight: 600;
+}
+
+.completed-badge {
+    color: #16a34a;
+    background-color: #d1fae5;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.incomplete-badge {
+    color: #6b7280;
+    background-color: #f3f4f6;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* ====================== Admin Delete Button ====================== */
+.delete-btn {
+    margin-top: 10px;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, filter 0.3s;
+}
+.delete-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.15);
+}
+
+/* ====================== No Exercises Text ====================== */
+.no-exercises {
+    font-size: 1.2rem;
+    color: #6b7280;
+    font-style: italic;
+    margin-top: 20px;
+}
+
+/* ====================== Responsive ====================== */
+@media (max-width: 768px) {
+    .listening-item {
+        padding: 15px 18px;
+    }
+    .section-title {
+        font-size: 1.8rem;
+    }
+    .progress-bar {
+        height: 16px;
+    }
+}
+</style>
+
+{% endblock %}

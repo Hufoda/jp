@@ -1,0 +1,18 @@
+<h2>Quiz Results</h2>
+
+<p>You got {{ score }} out of {{ total_questions }} correct.</p>
+
+<h3>Feedback</h3>
+<ul>
+    {% for item in feedback %}
+        <li>
+            <strong>Question:</strong> {{ item.question }}<br>
+            <strong>Your Answer:</strong> {{ item.selected_answer }}<br>
+            {% if item.correct %}
+                <span style="color: green;">Correct!</span>
+            {% else %}
+                <span style="color: red;">Incorrect.</span>
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
