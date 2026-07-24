@@ -123,6 +123,7 @@ def check_is_admin(user):
 @login_required
 @user_passes_test(check_is_admin, login_url='forbidden_page')
 def addLesson(request):
+    is_admin = check_is_admin(request.user)
     if request.method=='POST':
         a_form=AddLessonForm(request.POST)
         if a_form.is_valid():
@@ -130,7 +131,6 @@ def addLesson(request):
             return redirect('level_selection')
     else:
         a_form=AddLessonForm()
-        is_admin = check_is_admin(request.user)
     return render(request,"AddLesson_form.html",{'form':a_form, 'is_admin': is_admin})
 
 
@@ -166,8 +166,8 @@ def upload_post(request):
 from django.core.paginator import Paginator
 @login_required
 def view_posts(request):
-    if request.user.is_staff:
-        # Admins see all posts
+    if check_is_admin(request.user):
+        # Teachers/Admins see all posts including archived
         post_list = Post2.objects.all().order_by('-created_at')
     else:
         post_list = Post2.objects.filter(archived=False).order_by('-created_at')
@@ -409,8 +409,9 @@ def logout_view(request):
 def upload_video(request, lesson_id):
     lesson = LessonDetail.objects.get(id=lesson_id)
 
-    if not request.user.is_staff:
+    if not check_is_admin(request.user):
         return redirect('home')  # Prevent non-admin users
+
 
     if request.method == "POST":
         form = VideoUploadForm(request.POST, request.FILES)
@@ -592,6 +593,7 @@ def quiz_view(request, quiz_id):
             if selected_answer_id:
                 selected_answer = AnswerDetail.objects.get(id=selected_answer_id)
                 correct_answer = question.answers.filter(is_correct=True).first()  # Get the correct answer
+                correct_answer_text = correct_answer.ansText if correct_answer else "N/A"
 
                 # Check if the answer is correct and add feedback
                 if selected_answer.is_correct:
@@ -599,14 +601,14 @@ def quiz_view(request, quiz_id):
                     feedback.append({
                         'question': question.qzText,
                         'selected_answer': selected_answer.ansText,
-                        'correct_answer': correct_answer.ansText,
+                        'correct_answer': correct_answer_text,
                         'correct': True
                     })
                 else:
                     feedback.append({
                         'question': question.qzText,
                         'selected_answer': selected_answer.ansText,
-                        'correct_answer': correct_answer.ansText,
+                        'correct_answer': correct_answer_text,
                         'correct': False
                     })
 
@@ -758,7 +760,7 @@ def mark_video_complete(request, lesson_detail_id):
 def card_list(request, level):
     cards = ImageCard.objects.filter(level=level)
     lesson = get_object_or_404(Lesson, level=level)  # or however you retrieve the lesson
-    return render(request, "flashcards/card_list.html", {"cards": cards, "lesson": lesson, 'is_admin': is_admin})
+    return render(request, "flashcards/card_list.html", {"cards": cards, "lesson": lesson, 'is_admin': check_is_admin(request.user)})
 
 
 @login_required
@@ -784,7 +786,7 @@ def flashcard_add(request, level):
 @login_required
 def level_selection(request):
     is_admin = check_is_admin(request.user)
-    user_profile = getattr(request.user, 'userprofile', None)  # FIXED
+    user_profile = getattr(request.user, 'userprofile', None)
     user_level = user_profile.level if user_profile else 5  # Default N5
     return render(request, 'lesson_list.html', {
         'is_admin': is_admin,
@@ -794,27 +796,7 @@ def level_selection(request):
 @login_required
 def quiz_home(request):
     is_admin = check_is_admin(request.user)
-    user_profile = getattr(request.user, 'userprofile', None)  # FIXED
-    user_level = user_profile.level if user_profile else 5
-    return render(request, 'Quiz_home.html', {
-        'is_admin': is_admin,
-        'user_level': user_level
-    })
-
-@login_required
-def level_selection(request):
-    is_admin = check_is_admin(request.user)
-    user_profile = getattr(request.user, 'userprofile', None)  # FIXED
-    user_level = user_profile.level if user_profile else 5  # Default N5
-    return render(request, 'lesson_list.html', {
-        'is_admin': is_admin,
-        'user_level': user_level
-    })
-
-@login_required
-def quiz_home(request):
-    is_admin = check_is_admin(request.user)
-    user_profile = getattr(request.user, 'userprofile', None)  # FIXED
+    user_profile = getattr(request.user, 'userprofile', None)
     user_level = user_profile.level if user_profile else 5
     return render(request, 'Quiz_home.html', {
         'is_admin': is_admin,
