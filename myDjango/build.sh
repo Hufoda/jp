@@ -14,6 +14,9 @@ fi
 # Automatically create default admin superuser if it does not exist
 python manage.py shell << 'EOF'
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+Group.objects.get_or_create(name='Learners')
+Group.objects.get_or_create(name='Admins')
 User = get_user_model()
 if not User.objects.filter(username='admin').exists():
     User.objects.create_superuser('admin', 'admin@example.com', 'admin12345')

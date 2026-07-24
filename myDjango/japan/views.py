@@ -298,7 +298,7 @@ def register_view(request):
 
             # Hash the password
             user.save()
-            learner_group = Group.objects.get(name="Learners")
+            learner_group, _ = Group.objects.get_or_create(name="Learners")
             user.groups.add(learner_group)
 
             return redirect('login')

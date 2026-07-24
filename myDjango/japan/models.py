@@ -201,7 +201,8 @@ class UserProfile(models.Model):
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
-        UserProfile.objects.create(user=instance, level=5)
+        UserProfile.objects.get_or_create(user=instance, defaults={'level': 5})
+
 
 from django.utils import timezone
 from django.conf import settings
