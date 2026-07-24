@@ -84,7 +84,7 @@ from .models import Lesson, Progress
 
 @login_required
 def lesson_list(request, level):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     lesson = get_object_or_404(Lesson, level=level)
     lesson_details = lesson.lesson_details.all()
 
@@ -130,7 +130,7 @@ def addLesson(request):
             return redirect('level_selection')
     else:
         a_form=AddLessonForm()
-        is_admin = request.user.groups.filter(name="Admins").exists()
+        is_admin = is_admin(request.user)
     return render(request,"AddLesson_form.html",{'form':a_form, 'is_admin': is_admin})
 
 
@@ -153,7 +153,7 @@ def LessonDelete(request, lesson_id):  # Pass lesson_id to the view
 @login_required
 @user_passes_test(is_admin, login_url='forbidden_page')
 def upload_post(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     if request.method == 'POST':
         form = PostForm2(request.POST, request.FILES)
         if form.is_valid():
@@ -175,7 +175,7 @@ def view_posts(request):
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
 
     return render(request, 'Home.html', {'posts': posts, 'is_admin': is_admin})
 
@@ -259,29 +259,23 @@ def login_view(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data["username"].strip()  # Remove spaces
+            raw_username = form.cleaned_data["username"].strip()
             password = form.cleaned_data["password"]
 
-            # Check if the username exists (case-insensitive)
-            user = User.objects.filter(username__iexact=username).first()
-            if user is None :  # If user does NOT exist
-                messages.error(request, "User does not exist")
-                return render(request, "login.html", {"form": form})  # Re-render form with error
+            user = User.objects.filter(username__iexact=raw_username).first()
+            if user:
+                authenticated_user = authenticate(request, username=user.username, password=password)
+                if authenticated_user:
+                    login(request, authenticated_user)
+                    return redirect("home")
 
-            authenticated_user = authenticate(request, username=username, password=password)
-
-            if authenticated_user:  # If authentication is successful
-                login(request, authenticated_user)
-                return redirect("home")  # Redirect to User Home
-
-            else:
-                messages.error(request, "Username or password is invalid")
-                return render(request, "login.html", {"form": form})  # Re-render form with error
-
+            messages.error(request, "Username or password is invalid")
+            return render(request, "login.html", {"form": form})
     else:
         form = LoginForm()
 
     return render(request, "login.html", {"form": form})
+
 
 def home1_view(request):
     return render(request, 'Home.html')
@@ -315,7 +309,7 @@ def forbidden_page(request):
 
 @login_required
 def progress_view(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     if request.user.is_staff:  # Check if user is an admin
         registered_members = User.objects.all()  # Get all registered users
         return render(request, 'progress_dashboard.html', {'is_admin': True, 'registered_members': registered_members})
@@ -362,7 +356,7 @@ def complete_lesson(request, lesson_detail_id):
 
 @login_required
 def book_list(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     books = ReferenceBook.objects.all()
     form = ReferenceBookForm()
 
@@ -433,13 +427,13 @@ def upload_video(request, lesson_id):
 
 @login_required
 def user_detail(request, user_id):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     user = get_object_or_404(User, id=user_id)
     return render(request, 'user_detail.html', {'user': user, 'is_admin': is_admin})
 
 @login_required
 def upload_listening_exercise(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     if request.method == 'POST':
         form = ListeningExerciseForm(request.POST, request.FILES)
         if form.is_valid():
@@ -454,7 +448,7 @@ def upload_listening_exercise(request):
 @login_required
 
 def qz_list(request, level):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
 
     # Get the selected quiz type from the request (default to all if not provided)
     selected_quiz_type = request.GET.get('quiz_type', '')
@@ -480,8 +474,8 @@ def qz_list(request, level):
 @login_required
 @user_passes_test(is_admin, login_url='forbidden_page')
 def add_quiz_level(request, level):
-    is_admin = request.user.groups.filter(name="Admins").exists()
-    if not request.user.groups.filter(name="Admins").exists():
+    is_admin = is_admin(request.user)
+    if not is_admin(request.user):
         return redirect('Quiz_home')  # Redirect if not admin
 
     if request.method == "POST":
@@ -498,7 +492,7 @@ def add_quiz_level(request, level):
 
 @login_required
 def delete_quiz_level(request, quiz_id):
-    if not request.user.groups.filter(name="Admins").exists():
+    if not is_admin(request.user):
         return redirect('Quiz_home')  # Redirect if not admin
 
     quiz = get_object_or_404(QuizModel, id=quiz_id)  # Get a specific quiz by ID
@@ -529,7 +523,7 @@ def qz_detail(request, quiz_id):
 @login_required
 @user_passes_test(is_admin, login_url='forbidden_page')
 def add_quiz(request, quiz_id):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     quiz = get_object_or_404(QuizModel, id=quiz_id)
 
     if request.method == "POST":
@@ -576,7 +570,7 @@ def delete_quiz_question(request, quiz_id, question_id):
 
 @login_required
 def quiz_view(request, quiz_id):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     quiz = QuizModel.objects.get(id=quiz_id)
     questions = QuestionDetail.objects.filter(qzQuestion=quiz)
     questions_with_answers = []
@@ -789,7 +783,7 @@ def flashcard_add(request, level):
 
 @login_required
 def level_selection(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5  # Default N5
     return render(request, 'lesson_list.html', {
@@ -799,7 +793,7 @@ def level_selection(request):
 
 @login_required
 def quiz_home(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5
     return render(request, 'Quiz_home.html', {
@@ -809,7 +803,7 @@ def quiz_home(request):
 
 @login_required
 def level_selection(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5  # Default N5
     return render(request, 'lesson_list.html', {
@@ -819,7 +813,7 @@ def level_selection(request):
 
 @login_required
 def quiz_home(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5
     return render(request, 'Quiz_home.html', {
@@ -835,7 +829,7 @@ import json
 
 @login_required
 def listening_section(request):
-    is_admin = request.user.groups.filter(name="Admins").exists()
+    is_admin = is_admin(request.user)
     listening_exercises = Listening.objects.all()
 
     # Get completed exercises for this user

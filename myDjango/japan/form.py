@@ -21,14 +21,15 @@ class PostForm2(forms.ModelForm):
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(max_length=100,widget=forms.TextInput(attrs={'autocomplete': 'off'}))
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'autocomplete': 'new-password'}))
+    username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'autocomplete': 'current-password'}))
 
     def clean_username(self):
-        username = self.cleaned_data.get('username')
-        if not User.objects.filter(username=username).exists():
+        username = self.cleaned_data.get('username', '').strip()
+        if not User.objects.filter(username__iexact=username).exists():
             raise forms.ValidationError("Username does not exist")
         return username
+
 
     def clean_password(self):
         password = self.cleaned_data.get('password')
