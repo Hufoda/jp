@@ -95,6 +95,6 @@ path('restore/<int:post_id>/', views.restore_post, name='restore_post'),
 
 ]
 
-if settings.DEBUG and not settings.USE_S3:
+if not settings.USE_S3:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
