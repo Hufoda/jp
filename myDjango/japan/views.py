@@ -84,7 +84,7 @@ from .models import Lesson, Progress
 
 @login_required
 def lesson_list(request, level):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     lesson = get_object_or_404(Lesson, level=level)
     lesson_details = lesson.lesson_details.all()
 
@@ -116,12 +116,12 @@ def lesson_list(request, level):
 
 
 
-def is_admin(user):
+def check_is_admin(user):
     return user.is_authenticated and (user.is_staff or user.is_superuser or user.groups.filter(name="Admins").exists())
 
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def addLesson(request):
     if request.method=='POST':
         a_form=AddLessonForm(request.POST)
@@ -130,7 +130,7 @@ def addLesson(request):
             return redirect('level_selection')
     else:
         a_form=AddLessonForm()
-        is_admin = is_admin(request.user)
+        is_admin = check_is_admin(request.user)
     return render(request,"AddLesson_form.html",{'form':a_form, 'is_admin': is_admin})
 
 
@@ -139,7 +139,7 @@ from django.http import Http404
 
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def LessonDelete(request, lesson_id):  # Pass lesson_id to the view
     lesson = get_object_or_404(LessonDetail, id=lesson_id)  # Retrieve the lesson
 
@@ -151,9 +151,9 @@ def LessonDelete(request, lesson_id):  # Pass lesson_id to the view
 
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def upload_post(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     if request.method == 'POST':
         form = PostForm2(request.POST, request.FILES)
         if form.is_valid():
@@ -175,7 +175,7 @@ def view_posts(request):
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
 
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
 
     return render(request, 'Home.html', {'posts': posts, 'is_admin': is_admin})
 
@@ -309,7 +309,7 @@ def forbidden_page(request):
 
 @login_required
 def progress_view(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     if request.user.is_staff:  # Check if user is an admin
         registered_members = User.objects.all()  # Get all registered users
         return render(request, 'progress_dashboard.html', {'is_admin': True, 'registered_members': registered_members})
@@ -356,7 +356,7 @@ def complete_lesson(request, lesson_detail_id):
 
 @login_required
 def book_list(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     books = ReferenceBook.objects.all()
     form = ReferenceBookForm()
 
@@ -369,7 +369,7 @@ def book_list(request):
     return render(request, 'Reference.html', {'books': books, 'form': form, 'is_admin': is_admin})
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def add_book(request):
     # If the form is submitted, process the upload
     if request.method == 'POST':
@@ -386,7 +386,7 @@ def add_book(request):
 
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def delete_book(request, book_id):
     book = get_object_or_404(ReferenceBook, id=book_id)
 
@@ -427,13 +427,13 @@ def upload_video(request, lesson_id):
 
 @login_required
 def user_detail(request, user_id):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     user = get_object_or_404(User, id=user_id)
     return render(request, 'user_detail.html', {'user': user, 'is_admin': is_admin})
 
 @login_required
 def upload_listening_exercise(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     if request.method == 'POST':
         form = ListeningExerciseForm(request.POST, request.FILES)
         if form.is_valid():
@@ -448,7 +448,7 @@ def upload_listening_exercise(request):
 @login_required
 
 def qz_list(request, level):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
 
     # Get the selected quiz type from the request (default to all if not provided)
     selected_quiz_type = request.GET.get('quiz_type', '')
@@ -472,10 +472,10 @@ def qz_list(request, level):
 
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def add_quiz_level(request, level):
-    is_admin = is_admin(request.user)
-    if not is_admin(request.user):
+    is_admin = check_is_admin(request.user)
+    if not check_is_admin(request.user):
         return redirect('Quiz_home')  # Redirect if not admin
 
     if request.method == "POST":
@@ -492,7 +492,7 @@ def add_quiz_level(request, level):
 
 @login_required
 def delete_quiz_level(request, quiz_id):
-    if not is_admin(request.user):
+    if not check_is_admin(request.user):
         return redirect('Quiz_home')  # Redirect if not admin
 
     quiz = get_object_or_404(QuizModel, id=quiz_id)  # Get a specific quiz by ID
@@ -517,13 +517,13 @@ def qz_detail(request, quiz_id):
         'questions_with_answers': questions_with_answers,
         'quiz_id': quiz_id,
         "quiz": quiz_detail,
-        "is_admin": is_admin(request.user)
+        "is_admin": check_is_admin(request.user)
     })
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 def add_quiz(request, quiz_id):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     quiz = get_object_or_404(QuizModel, id=quiz_id)
 
     if request.method == "POST":
@@ -570,7 +570,7 @@ def delete_quiz_question(request, quiz_id, question_id):
 
 @login_required
 def quiz_view(request, quiz_id):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     quiz = QuizModel.objects.get(id=quiz_id)
     questions = QuestionDetail.objects.filter(qzQuestion=quiz)
     questions_with_answers = []
@@ -662,7 +662,7 @@ def edit_quiz_question(request, quiz_id, question_id):
     return render(request, 'Quiz/edit_question.html', {
         'form': form,
         'quiz_id': quiz_id,
-        'is_admin': is_admin(request.user)  # ✅ fixed
+        'is_admin': check_is_admin(request.user)  # ✅ fixed
     })
 
 
@@ -677,7 +677,7 @@ def delete_lesson(request, lesson_id):
     lesson.save()
     return redirect('level_selection')
 
-@user_passes_test(is_admin)
+@user_passes_test(check_is_admin)
 def delete_listening(request, listening_id):
     listening = get_object_or_404(Listening, id=listening_id)
     listening.archived = True
@@ -686,7 +686,7 @@ def delete_listening(request, listening_id):
     return redirect('listening_section')
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 @require_POST
 def delete_video(request, video_id):
     video = get_object_or_404(Video, id=video_id)
@@ -713,7 +713,7 @@ def lesson_detail(request, lesson_detail_id):
         'videos': videos,
         'completed_videos': list(completed_videos),
         'all_completed': all_completed,
-        'is_admin': is_admin(request.user),  # ✅ FIXED
+        'is_admin': check_is_admin(request.user),  # ✅ FIXED
     }
     return render(request, 'ShowVideo.html', context)
 
@@ -783,7 +783,7 @@ def flashcard_add(request, level):
 
 @login_required
 def level_selection(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5  # Default N5
     return render(request, 'lesson_list.html', {
@@ -793,7 +793,7 @@ def level_selection(request):
 
 @login_required
 def quiz_home(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5
     return render(request, 'Quiz_home.html', {
@@ -803,7 +803,7 @@ def quiz_home(request):
 
 @login_required
 def level_selection(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5  # Default N5
     return render(request, 'lesson_list.html', {
@@ -813,7 +813,7 @@ def level_selection(request):
 
 @login_required
 def quiz_home(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     user_profile = getattr(request.user, 'userprofile', None)  # FIXED
     user_level = user_profile.level if user_profile else 5
     return render(request, 'Quiz_home.html', {
@@ -829,7 +829,7 @@ import json
 
 @login_required
 def listening_section(request):
-    is_admin = is_admin(request.user)
+    is_admin = check_is_admin(request.user)
     listening_exercises = Listening.objects.all()
 
     # Get completed exercises for this user
@@ -885,7 +885,7 @@ def mark_listening_completed(request, listening_id):
 
 
 @login_required
-@user_passes_test(is_admin, login_url='forbidden_page')
+@user_passes_test(check_is_admin, login_url='forbidden_page')
 @require_POST
 def restore_video(request, video_id):
     video = get_object_or_404(Video, id=video_id)
@@ -908,4 +908,4 @@ def log_achievement(user, action, model_name, pk, title=None, text=None, image_p
 @login_required
 def achievement_list(request):
     achievements = Achievement.objects.order_by('-changed_at')
-    return render(request, 'achievements.html', {'achievements': achievements,  'is_admin': is_admin(request.user)})
+    return render(request, 'achievements.html', {'achievements': achievements,  'is_admin': check_is_admin(request.user)})
