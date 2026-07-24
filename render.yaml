@@ -4,7 +4,7 @@ services:
     runtime: python
     rootDir: myDjango
     plan: free
-    buildCommand: "./build.sh"
+    buildCommand: "chmod +x build.sh && ./build.sh"
     startCommand: "gunicorn myDjango.wsgi:application --bind 0.0.0.0:$PORT"
     healthCheckPath: /health/
     envVars:

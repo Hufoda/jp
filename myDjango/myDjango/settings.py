@@ -19,8 +19,16 @@ SECRET_KEY = os.environ.get(
 
 DEBUG = os.environ.get("DEBUG", "True").lower() in ("true", "1", "yes")
 
-allowed_hosts = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1")
-ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(",") if host.strip()]
+allowed_hosts_env = os.environ.get("ALLOWED_HOSTS", "").strip()
+if allowed_hosts_env:
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(",") if host.strip()]
+else:
+    ALLOWED_HOSTS = [".onrender.com", "localhost", "127.0.0.1"]
+
+render_hostname = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if render_hostname and render_hostname not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_hostname)
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -147,8 +155,14 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
 
-CSRF_TRUSTED_ORIGINS = [
-    origin.strip()
-    for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",")
-    if origin.strip()
-]
+csrf_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "").strip()
+if csrf_env:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_env.split(",") if origin.strip()]
+else:
+    CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "http://localhost", "http://127.0.0.1"]
+
+if render_hostname:
+    render_url = f"https://{render_hostname}"
+    if render_url not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_url)
+
